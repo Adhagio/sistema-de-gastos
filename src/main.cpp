@@ -1,9 +1,11 @@
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
 
 #include "Carteira.hpp"
 #include "Categoria.hpp"
+#include "Gasto.hpp"
 
 int main() {
   Carteira carteira;
@@ -13,6 +15,8 @@ int main() {
     std::cout << "=== Sistema de gastos ===" << std::endl;
     std::cout << "1) Cadastrar categoria" << std::endl;
     std::cout << "2) Listar categorias" << std::endl;
+    std::cout << "3) Lancar gasto" << std::endl;
+    std::cout << "4) Listar gastos" << std::endl;
     std::cout << "0) Sair" << std::endl;
     std::cout << "> ";
 
@@ -75,6 +79,57 @@ int main() {
         }
         std::cout << std::endl;
       }
+
+    } else if (opcao == 3) {
+      std::cout << "Descricao: ";
+      std::string descricao;
+      std::getline(std::cin, descricao);
+
+      std::cout << "Valor: ";
+      double valor;
+      if (!(std::cin >> valor)) {
+        if (std::cin.eof()) {
+          std::cout << std::endl << "Entrada encerrada." << std::endl;
+          break;
+        }
+        std::cin.clear();
+        std::cin.ignore(1000, '\n');
+        std::cout << "Entrada invalida: valor deve ser um numero." << std::endl;
+        continue;
+      }
+      std::cin.ignore(1000, '\n');
+
+      std::cout << "Data (AAAA-MM-DD): ";
+      std::string data;
+      std::getline(std::cin, data);
+
+      std::cout << "Categoria: ";
+      std::string categoria;
+      std::getline(std::cin, categoria);
+
+      if (carteira.lancarGasto(descricao, valor, data, categoria)) {
+        std::cout << "Gasto cadastrado." << std::endl;
+      } else {
+        std::cout << "Erro: descricao vazia, valor <= 0, data invalida ou "
+                     "categoria inexistente."
+                  << std::endl;
+      }
+
+    } else if (opcao == 4) {
+      std::vector<Gasto> gastos = carteira.listarGastos();
+      if (gastos.empty()) {
+        std::cout << "Nenhum gasto lancado." << std::endl;
+      }
+      // 2 casas decimais, como no exemplo do DESCRICAO.md
+      std::cout << std::fixed << std::setprecision(2);
+      for (size_t i = 0; i < gastos.size(); ++i) {
+        std::cout << "  " << gastos[i].getDescricao() << " - "
+                  << gastos[i].getData() << " - R$ " << gastos[i].getValor()
+                  << " - " << gastos[i].getCategoria() << std::endl;
+      }
+      // volta ao formato normal para as proximas saidas (ex.: limites)
+      std::cout.unsetf(std::ios::floatfield);
+      std::cout.precision(6);
 
     } else {
       std::cout << "Opcao invalida." << std::endl;

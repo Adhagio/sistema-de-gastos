@@ -21,3 +21,33 @@ std::vector<Categoria> Carteira::listarCategorias() const {
   }
   return resposta;
 }
+
+bool Carteira::lancarGasto(const std::string &descricao, double valor,
+                           const std::string &data,
+                           const std::string &categoria) {
+  // regras: descricao vazia, valor <= 0, data invalida e categoria
+  // inexistente fazem o lancamento falhar
+  if (descricao.empty() || valor <= 0) {
+    return false;
+  }
+  if (!Gasto::dataValida(data)) {
+    return false;
+  }
+
+  std::map<std::string, Categoria>::iterator it = categorias.find(categoria);
+  if (it == categorias.end()) {
+    return false;
+  }
+
+  // deu certo: guarda o gasto (no fim, para manter a ordem) e
+  // soma o valor ao total da categoria
+  gastos.push_back(Gasto(descricao, valor, data, categoria));
+  it->second.registrarGasto(valor);
+  return true;
+}
+
+std::vector<Gasto> Carteira::listarGastos() const {
+  // copia a list para um vector, na ordem dos lancamentos
+  std::vector<Gasto> resposta(gastos.begin(), gastos.end());
+  return resposta;
+}

@@ -14,10 +14,14 @@ public:
   bool cadastrarCategoria(const std::string &nome, double limite);
   std::vector<Categoria> listarCategorias() const;
 
+  bool lancarGasto(const std::string &descricao, double valor,
+                   const std::string &data, const std::string &categoria);
+  std::vector<Gasto> listarGastos() const;
+
 private:
   // map: busca pelo nome e ja sai em ordem alfabetica
   std::map<std::string, Categoria> categorias;
-  // list: guarda a ordem dos lancamentos (vazia ate a etapa 3)
+  // list: guarda a ordem dos lancamentos (push_back no fim, leitura no fim)
   std::list<Gasto> gastos;
 };
 
