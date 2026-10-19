@@ -51,3 +51,16 @@ std::vector<Gasto> Carteira::listarGastos() const {
   std::vector<Gasto> resposta(gastos.begin(), gastos.end());
   return resposta;
 }
+
+std::vector<Categoria> Carteira::categoriasEstouradas() const {
+  std::vector<Categoria> resposta;
+  // estourou() usa o total ja guardado na Categoria (somado pelo
+  // registrarGasto a cada lancamento) - nao precisa somar os gastos de novo
+  for (std::map<std::string, Categoria>::const_iterator it = categorias.begin();
+       it != categorias.end(); ++it) {
+    if (it->second.estourou()) {
+      resposta.push_back(it->second);
+    }
+  }
+  return resposta;
+}

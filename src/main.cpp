@@ -17,6 +17,8 @@ int main() {
     std::cout << "2) Listar categorias" << std::endl;
     std::cout << "3) Lancar gasto" << std::endl;
     std::cout << "4) Listar gastos" << std::endl;
+    std::cout << "5) Total por categoria" << std::endl;
+    std::cout << "6) Categorias que passaram do limite" << std::endl;
     std::cout << "0) Sair" << std::endl;
     std::cout << "> ";
 
@@ -128,6 +130,41 @@ int main() {
                   << " - " << gastos[i].getCategoria() << std::endl;
       }
       // volta ao formato normal para as proximas saidas (ex.: limites)
+      std::cout.unsetf(std::ios::floatfield);
+      std::cout.precision(6);
+
+    } else if (opcao == 5) {
+      // mostra todas as categorias, inclusive as com total zero;
+      // o total vem guardado na Categoria (copia feita por listarCategorias)
+      std::vector<Categoria> categorias = carteira.listarCategorias();
+      if (categorias.empty()) {
+        std::cout << "Nenhuma categoria cadastrada." << std::endl;
+      }
+      std::cout << std::fixed << std::setprecision(2);
+      for (size_t i = 0; i < categorias.size(); ++i) {
+        std::cout << "  " << categorias[i].getNome() << ": R$ "
+                  << categorias[i].getTotalGasto();
+        if (categorias[i].temLimite()) {
+          std::cout << " (limite R$ " << categorias[i].getLimite() << ")";
+        } else {
+          std::cout << " (sem limite)";
+        }
+        std::cout << std::endl;
+      }
+      std::cout.unsetf(std::ios::floatfield);
+      std::cout.precision(6);
+
+    } else if (opcao == 6) {
+      std::vector<Categoria> estouradas = carteira.categoriasEstouradas();
+      if (estouradas.empty()) {
+        std::cout << "Nenhuma categoria passou do limite." << std::endl;
+      }
+      std::cout << std::fixed << std::setprecision(2);
+      for (size_t i = 0; i < estouradas.size(); ++i) {
+        std::cout << "  " << estouradas[i].getNome() << ": R$ "
+                  << estouradas[i].getTotalGasto() << " (limite R$ "
+                  << estouradas[i].getLimite() << ")" << std::endl;
+      }
       std::cout.unsetf(std::ios::floatfield);
       std::cout.precision(6);
 

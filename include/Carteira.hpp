@@ -18,6 +18,8 @@ public:
                    const std::string &data, const std::string &categoria);
   std::vector<Gasto> listarGastos() const;
 
+  std::vector<Categoria> categoriasEstouradas() const;
+
 private:
   // map: busca pelo nome e ja sai em ordem alfabetica
   std::map<std::string, Categoria> categorias;
