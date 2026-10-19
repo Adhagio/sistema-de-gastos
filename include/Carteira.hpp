@@ -18,6 +18,7 @@ public:
                    const std::string &data, const std::string &categoria);
   std::vector<Gasto> listarGastos() const;
 
+  std::vector<Gasto> maioresGastos(int n) const;
   std::vector<Categoria> categoriasEstouradas() const;
 
 private:

@@ -1,5 +1,7 @@
 #include "Carteira.hpp"
 
+#include <algorithm>
+
 bool Carteira::cadastrarCategoria(const std::string &nome, double limite) {
   if (nome.empty()) {
     return false;
@@ -49,6 +51,34 @@ bool Carteira::lancarGasto(const std::string &descricao, double valor,
 std::vector<Gasto> Carteira::listarGastos() const {
   // copia a list para um vector, na ordem dos lancamentos
   std::vector<Gasto> resposta(gastos.begin(), gastos.end());
+  return resposta;
+}
+
+std::vector<Gasto> Carteira::maioresGastos(int n) const {
+  // N <= 0 nao tem o que mostrar
+  if (n <= 0) {
+    return std::vector<Gasto>();
+  }
+
+  // copia a list para um vector: o sort do vector e o mais simples que a
+  // gente viu, e a copia protege os dados guardados (a consulta e const)
+  std::vector<Gasto> copia(gastos.begin(), gastos.end());
+
+  // sort em ordem crescente usando Gasto::operator< (compara pelo valor)
+  std::sort(copia.begin(), copia.end());
+
+  // se N for maior que o total, devolve todos
+  int quantidade = n;
+  if (quantidade > static_cast<int>(copia.size())) {
+    quantidade = static_cast<int>(copia.size());
+  }
+
+  // os maiores ficaram no fim do vector; pegamos de la para tras,
+  // assim a resposta ja sai do maior para o menor
+  std::vector<Gasto> resposta;
+  for (int i = 0; i < quantidade; ++i) {
+    resposta.push_back(copia[copia.size() - 1 - i]);
+  }
   return resposta;
 }
 

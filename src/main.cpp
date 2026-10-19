@@ -19,6 +19,7 @@ int main() {
     std::cout << "4) Listar gastos" << std::endl;
     std::cout << "5) Total por categoria" << std::endl;
     std::cout << "6) Categorias que passaram do limite" << std::endl;
+    std::cout << "7) Maiores gastos" << std::endl;
     std::cout << "0) Sair" << std::endl;
     std::cout << "> ";
 
@@ -167,6 +168,38 @@ int main() {
       }
       std::cout.unsetf(std::ios::floatfield);
       std::cout.precision(6);
+
+    } else if (opcao == 7) {
+      std::cout << "N: ";
+      int n;
+      if (!(std::cin >> n)) {
+        if (std::cin.eof()) {
+          std::cout << std::endl << "Entrada encerrada." << std::endl;
+          break;
+        }
+        std::cin.clear();
+        std::cin.ignore(1000, '\n');
+        std::cout << "Entrada invalida: N deve ser um numero." << std::endl;
+        continue;
+      }
+      std::cin.ignore(1000, '\n');
+
+      if (n <= 0) {
+        std::cout << "N deve ser maior que zero." << std::endl;
+      } else {
+        std::vector<Gasto> maiores = carteira.maioresGastos(n);
+        if (maiores.empty()) {
+          std::cout << "Nenhum gasto lancado." << std::endl;
+        }
+        // maior primeiro (o sort fica crescente, entao os maiores estao no fim)
+        std::cout << std::fixed << std::setprecision(2);
+        for (size_t i = 0; i < maiores.size(); ++i) {
+          std::cout << "  " << maiores[i].getDescricao() << " - R$ "
+                    << maiores[i].getValor() << std::endl;
+        }
+        std::cout.unsetf(std::ios::floatfield);
+        std::cout.precision(6);
+      }
 
     } else {
       std::cout << "Opcao invalida." << std::endl;
