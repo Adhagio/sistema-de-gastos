@@ -1,0 +1,13 @@
+abc
+1
+Alimentacao
+35,90
+1
+Alimentacao
+500
+3
+Almoco
+abc
+7
+muitos
+0
