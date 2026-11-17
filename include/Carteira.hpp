@@ -11,10 +11,10 @@
 
 class Carteira {
 public:
-  bool cadastrarCategoria(const std::string &nome, double limite);
+  void cadastrarCategoria(const std::string &nome, double limite);
   std::vector<Categoria> listarCategorias() const;
 
-  bool lancarGasto(const std::string &descricao, double valor,
+  void lancarGasto(const std::string &descricao, double valor,
                    const std::string &data, const std::string &categoria);
   std::vector<Gasto> listarGastos() const;
 

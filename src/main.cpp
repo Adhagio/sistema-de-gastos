@@ -1,6 +1,7 @@
 #include <exception>
 #include <iomanip>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -9,13 +10,27 @@
 #include "Categoria.hpp"
 #include "Gasto.hpp"
 
+namespace {
+
+// Le a linha inteira para converter com stoi/stod. false = entrada acabou.
+bool lerLinha(const std::string& rotulo, std::string& texto) {
+  std::cout << rotulo;
+  if (!std::getline(std::cin, texto)) {
+    std::cout << std::endl << "Entrada encerrada." << std::endl;
+    return false;
+  }
+  return true;
+}
+
+}  // namespace
+
 int main() {
   Carteira carteira;
   Arquivo arquivo;
   const std::string nomeArquivo = "dados.txt";
   bool rodando = true;
 
-  // carrega no inicio: se o arquivo nao existe, a carteira fica vazia
+  // carrega no inicio: qualquer falha e tratada aqui, no main
   try {
     arquivo.carregar(carteira, nomeArquivo);
   } catch (const std::exception& e) {
@@ -23,186 +38,145 @@ int main() {
   }
 
   while (rodando) {
-    std::cout << "=== Sistema de gastos ===" << std::endl;
-    std::cout << "1) Cadastrar categoria" << std::endl;
-    std::cout << "2) Listar categorias" << std::endl;
-    std::cout << "3) Lancar gasto" << std::endl;
-    std::cout << "4) Listar gastos" << std::endl;
-    std::cout << "5) Total por categoria" << std::endl;
-    std::cout << "6) Categorias que passaram do limite" << std::endl;
-    std::cout << "7) Maiores gastos" << std::endl;
-    std::cout << "0) Sair" << std::endl;
-    std::cout << "> ";
+    try {
+      std::cout << "=== Sistema de gastos ===" << std::endl;
+      std::cout << "1) Cadastrar categoria" << std::endl;
+      std::cout << "2) Listar categorias" << std::endl;
+      std::cout << "3) Lancar gasto" << std::endl;
+      std::cout << "4) Listar gastos" << std::endl;
+      std::cout << "5) Total por categoria" << std::endl;
+      std::cout << "6) Categorias que passaram do limite" << std::endl;
+      std::cout << "7) Maiores gastos" << std::endl;
+      std::cout << "0) Sair" << std::endl;
 
-    int opcao;
-    if (!(std::cin >> opcao)) {
-      // texto onde se espera numero: nao deixa o menu travar
-      if (std::cin.eof()) {
-        std::cout << std::endl << "Entrada encerrada." << std::endl;
+      std::string linhaOpcao;
+      if (!lerLinha("> ", linhaOpcao)) {
         break;
       }
-      std::cin.clear();
-      std::cin.ignore(1000, '\n');
-      std::cout << "Entrada invalida: digite um numero." << std::endl;
-      continue;
-    }
-    // descarta o resto da linha, para o getline abaixo ler a proxima
-    std::cin.ignore(1000, '\n');
+      int opcao = std::stoi(linhaOpcao);
 
-    if (opcao == 0) {
-      try {
-        arquivo.salvar(carteira, nomeArquivo);
-      } catch (const std::exception& e) {
-        std::cout << "Erro ao salvar: " << e.what() << std::endl;
-      }
-      std::cout << "Ate logo." << std::endl;
-      rodando = false;
+      if (opcao == 0) {
+        try {
+          arquivo.salvar(carteira, nomeArquivo);
+        } catch (const std::exception& e) {
+          std::cout << "Erro ao salvar: " << e.what() << std::endl;
+        }
+        std::cout << "Ate logo." << std::endl;
+        rodando = false;
 
-    } else if (opcao == 1) {
-      std::cout << "Nome: ";
-      std::string nome;
-      std::getline(std::cin, nome);
-
-      std::cout << "Limite (0 = sem limite): ";
-      double limite;
-      if (!(std::cin >> limite)) {
-        if (std::cin.eof()) {
-          std::cout << std::endl << "Entrada encerrada." << std::endl;
+      } else if (opcao == 1) {
+        std::string nome;
+        if (!lerLinha("Nome: ", nome)) {
           break;
         }
-        std::cin.clear();
-        std::cin.ignore(1000, '\n');
-        std::cout << "Entrada invalida: limite deve ser um numero." << std::endl;
-        continue;
-      }
-      std::cin.ignore(1000, '\n');
 
-      if (carteira.cadastrarCategoria(nome, limite)) {
+        std::string textoLimite;
+        if (!lerLinha("Limite (0 = sem limite): ", textoLimite)) {
+          break;
+        }
+        double limite = std::stod(textoLimite);
+
+        carteira.cadastrarCategoria(nome, limite);
         std::cout << "Categoria cadastrada." << std::endl;
-      } else {
-        std::cout << "Erro: ja existe categoria com esse nome (ou nome vazio)."
-                  << std::endl;
-      }
 
-    } else if (opcao == 2) {
-      std::vector<Categoria> categorias = carteira.listarCategorias();
-      if (categorias.empty()) {
-        std::cout << "Nenhuma categoria cadastrada." << std::endl;
-      }
-      for (size_t i = 0; i < categorias.size(); ++i) {
-        std::cout << "  " << categorias[i].getNome();
-        if (categorias[i].temLimite()) {
-          std::cout << " - limite R$ " << categorias[i].getLimite();
-        } else {
-          std::cout << " - sem limite";
+      } else if (opcao == 2) {
+        std::vector<Categoria> categorias = carteira.listarCategorias();
+        if (categorias.empty()) {
+          std::cout << "Nenhuma categoria cadastrada." << std::endl;
         }
-        std::cout << std::endl;
-      }
+        for (size_t i = 0; i < categorias.size(); ++i) {
+          std::cout << "  " << categorias[i].getNome();
+          if (categorias[i].temLimite()) {
+            std::cout << " - limite R$ " << categorias[i].getLimite();
+          } else {
+            std::cout << " - sem limite";
+          }
+          std::cout << std::endl;
+        }
 
-    } else if (opcao == 3) {
-      std::cout << "Descricao: ";
-      std::string descricao;
-      std::getline(std::cin, descricao);
-
-      std::cout << "Valor: ";
-      double valor;
-      if (!(std::cin >> valor)) {
-        if (std::cin.eof()) {
-          std::cout << std::endl << "Entrada encerrada." << std::endl;
+      } else if (opcao == 3) {
+        std::string descricao;
+        if (!lerLinha("Descricao: ", descricao)) {
           break;
         }
-        std::cin.clear();
-        std::cin.ignore(1000, '\n');
-        std::cout << "Entrada invalida: valor deve ser um numero." << std::endl;
-        continue;
-      }
-      std::cin.ignore(1000, '\n');
 
-      std::cout << "Data (AAAA-MM-DD): ";
-      std::string data;
-      std::getline(std::cin, data);
+        std::string textoValor;
+        if (!lerLinha("Valor: ", textoValor)) {
+          break;
+        }
+        double valor = std::stod(textoValor);
 
-      std::cout << "Categoria: ";
-      std::string categoria;
-      std::getline(std::cin, categoria);
+        std::string data;
+        if (!lerLinha("Data (AAAA-MM-DD): ", data)) {
+          break;
+        }
 
-      if (carteira.lancarGasto(descricao, valor, data, categoria)) {
+        std::string categoria;
+        if (!lerLinha("Categoria: ", categoria)) {
+          break;
+        }
+
+        carteira.lancarGasto(descricao, valor, data, categoria);
         std::cout << "Gasto cadastrado." << std::endl;
-      } else {
-        std::cout << "Erro: descricao vazia, valor <= 0, data invalida ou "
-                     "categoria inexistente."
-                  << std::endl;
-      }
 
-    } else if (opcao == 4) {
-      std::vector<Gasto> gastos = carteira.listarGastos();
-      if (gastos.empty()) {
-        std::cout << "Nenhum gasto lancado." << std::endl;
-      }
-      // 2 casas decimais, como no exemplo do DESCRICAO.md
-      std::cout << std::fixed << std::setprecision(2);
-      for (size_t i = 0; i < gastos.size(); ++i) {
-        std::cout << "  " << gastos[i].getDescricao() << " - "
-                  << gastos[i].getData() << " - R$ " << gastos[i].getValor()
-                  << " - " << gastos[i].getCategoria() << std::endl;
-      }
-      // volta ao formato normal para as proximas saidas (ex.: limites)
-      std::cout.unsetf(std::ios::floatfield);
-      std::cout.precision(6);
-
-    } else if (opcao == 5) {
-      // mostra todas as categorias, inclusive as com total zero;
-      // o total vem guardado na Categoria (copia feita por listarCategorias)
-      std::vector<Categoria> categorias = carteira.listarCategorias();
-      if (categorias.empty()) {
-        std::cout << "Nenhuma categoria cadastrada." << std::endl;
-      }
-      std::cout << std::fixed << std::setprecision(2);
-      for (size_t i = 0; i < categorias.size(); ++i) {
-        std::cout << "  " << categorias[i].getNome() << ": R$ "
-                  << categorias[i].getTotalGasto();
-        if (categorias[i].temLimite()) {
-          std::cout << " (limite R$ " << categorias[i].getLimite() << ")";
-        } else {
-          std::cout << " (sem limite)";
+      } else if (opcao == 4) {
+        std::vector<Gasto> gastos = carteira.listarGastos();
+        if (gastos.empty()) {
+          std::cout << "Nenhum gasto lancado." << std::endl;
         }
-        std::cout << std::endl;
-      }
-      std::cout.unsetf(std::ios::floatfield);
-      std::cout.precision(6);
+        // 2 casas decimais, como no exemplo do DESCRICAO.md
+        std::cout << std::fixed << std::setprecision(2);
+        for (size_t i = 0; i < gastos.size(); ++i) {
+          std::cout << "  " << gastos[i].getDescricao() << " - "
+                    << gastos[i].getData() << " - R$ " << gastos[i].getValor()
+                    << " - " << gastos[i].getCategoria() << std::endl;
+        }
+        // volta ao formato normal para as proximas saidas (ex.: limites)
+        std::cout.unsetf(std::ios::floatfield);
+        std::cout.precision(6);
 
-    } else if (opcao == 6) {
-      std::vector<Categoria> estouradas = carteira.categoriasEstouradas();
-      if (estouradas.empty()) {
-        std::cout << "Nenhuma categoria passou do limite." << std::endl;
-      }
-      std::cout << std::fixed << std::setprecision(2);
-      for (size_t i = 0; i < estouradas.size(); ++i) {
-        std::cout << "  " << estouradas[i].getNome() << ": R$ "
-                  << estouradas[i].getTotalGasto() << " (limite R$ "
-                  << estouradas[i].getLimite() << ")" << std::endl;
-      }
-      std::cout.unsetf(std::ios::floatfield);
-      std::cout.precision(6);
+      } else if (opcao == 5) {
+        // mostra todas as categorias, inclusive as com total zero;
+        // o total vem guardado na Categoria (copia feita por listarCategorias)
+        std::vector<Categoria> categorias = carteira.listarCategorias();
+        if (categorias.empty()) {
+          std::cout << "Nenhuma categoria cadastrada." << std::endl;
+        }
+        std::cout << std::fixed << std::setprecision(2);
+        for (size_t i = 0; i < categorias.size(); ++i) {
+          std::cout << "  " << categorias[i].getNome() << ": R$ "
+                    << categorias[i].getTotalGasto();
+          if (categorias[i].temLimite()) {
+            std::cout << " (limite R$ " << categorias[i].getLimite() << ")";
+          } else {
+            std::cout << " (sem limite)";
+          }
+          std::cout << std::endl;
+        }
+        std::cout.unsetf(std::ios::floatfield);
+        std::cout.precision(6);
 
-    } else if (opcao == 7) {
-      std::cout << "N: ";
-      int n;
-      if (!(std::cin >> n)) {
-        if (std::cin.eof()) {
-          std::cout << std::endl << "Entrada encerrada." << std::endl;
+      } else if (opcao == 6) {
+        std::vector<Categoria> estouradas = carteira.categoriasEstouradas();
+        if (estouradas.empty()) {
+          std::cout << "Nenhuma categoria passou do limite." << std::endl;
+        }
+        std::cout << std::fixed << std::setprecision(2);
+        for (size_t i = 0; i < estouradas.size(); ++i) {
+          std::cout << "  " << estouradas[i].getNome() << ": R$ "
+                    << estouradas[i].getTotalGasto() << " (limite R$ "
+                    << estouradas[i].getLimite() << ")" << std::endl;
+        }
+        std::cout.unsetf(std::ios::floatfield);
+        std::cout.precision(6);
+
+      } else if (opcao == 7) {
+        std::string textoN;
+        if (!lerLinha("N: ", textoN)) {
           break;
         }
-        std::cin.clear();
-        std::cin.ignore(1000, '\n');
-        std::cout << "Entrada invalida: N deve ser um numero." << std::endl;
-        continue;
-      }
-      std::cin.ignore(1000, '\n');
+        int n = std::stoi(textoN);
 
-      if (n <= 0) {
-        std::cout << "N deve ser maior que zero." << std::endl;
-      } else {
         std::vector<Gasto> maiores = carteira.maioresGastos(n);
         if (maiores.empty()) {
           std::cout << "Nenhum gasto lancado." << std::endl;
@@ -215,10 +189,12 @@ int main() {
         }
         std::cout.unsetf(std::ios::floatfield);
         std::cout.precision(6);
-      }
 
-    } else {
-      std::cout << "Opcao invalida." << std::endl;
+      } else {
+        throw std::invalid_argument("Opcao invalida: digite de 0 a 7.");
+      }
+    } catch (const std::exception& e) {
+      std::cout << "Erro: " << e.what() << std::endl;
     }
   }
 

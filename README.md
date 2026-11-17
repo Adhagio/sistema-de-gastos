@@ -62,3 +62,9 @@ Escreva com as suas palavras:
 - **Solicitação:** classe própria `Arquivo` com os métodos `salvar` e `carregar`, usando linhas com prefixo `C` (categoria) e `G` (gasto), com `try/catch` apenas no `main`.
 - **Implementação:** a classe `Arquivo` foi criada separadamente e utiliza apenas `<fstream>`. No `main`, o carregamento ocorre antes do menu e o salvamento na opção `0`, ambos dentro de `try/catch`.
 - **Destaques:** uso de `errno == ENOENT` para tratar arquivo inexistente (retornando vazio) e limitação das casas decimais para evitar dízimas.
+
+### Exceções
+
+- **Pedido:** substituir `bool` de erro por exceções (`invalid_argument` e `runtime_error`), com `try/catch` apenas no `main`, sem quebrar com texto no lugar de números.
+- **Implementação:** métodos de `Carteira` e `Arquivo` agora são `void` e lançam exceções; o `main` envolve o laço em `try` e imprime `Erro: ...` no `catch`.
+- **Resultado:** digitar `"abc"` no valor não trava o programa; linha corrompida em `dados.txt` é avisada e não é carregada.

@@ -1,10 +1,11 @@
 #include "Carteira.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
-bool Carteira::cadastrarCategoria(const std::string &nome, double limite) {
+void Carteira::cadastrarCategoria(const std::string &nome, double limite) {
   if (nome.empty()) {
-    return false;
+    throw std::invalid_argument("Nome da categoria nao pode ser vazio.");
   }
 
   // insert nao troca o que ja esta la:
@@ -12,7 +13,9 @@ bool Carteira::cadastrarCategoria(const std::string &nome, double limite) {
   std::pair<std::map<std::string, Categoria>::iterator, bool> resultado =
       categorias.insert(std::make_pair(nome, Categoria(nome, limite)));
 
-  return resultado.second;
+  if (!resultado.second) {
+    throw std::invalid_argument("Ja existe categoria com esse nome: " + nome);
+  }
 }
 
 std::vector<Categoria> Carteira::listarCategorias() const {
@@ -24,28 +27,30 @@ std::vector<Categoria> Carteira::listarCategorias() const {
   return resposta;
 }
 
-bool Carteira::lancarGasto(const std::string &descricao, double valor,
-                           const std::string &data,
-                           const std::string &categoria) {
+void Carteira::lancarGasto(const std::string &descricao, double valor,
+                            const std::string &data,
+                            const std::string &categoria) {
   // regras: descricao vazia, valor <= 0, data invalida e categoria
-  // inexistente fazem o lancamento falhar
-  if (descricao.empty() || valor <= 0) {
-    return false;
+  // inexistente sao dados invalidos
+  if (descricao.empty()) {
+    throw std::invalid_argument("Descricao do gasto nao pode ser vazia.");
+  }
+  if (valor <= 0) {
+    throw std::invalid_argument("Valor do gasto deve ser maior que zero.");
   }
   if (!Gasto::dataValida(data)) {
-    return false;
+    throw std::invalid_argument("Data invalida (use AAAA-MM-DD): " + data);
   }
 
   std::map<std::string, Categoria>::iterator it = categorias.find(categoria);
   if (it == categorias.end()) {
-    return false;
+    throw std::invalid_argument("Categoria inexistente: " + categoria);
   }
 
   // deu certo: guarda o gasto (no fim, para manter a ordem) e
   // soma o valor ao total da categoria
   gastos.push_back(Gasto(descricao, valor, data, categoria));
   it->second.registrarGasto(valor);
-  return true;
 }
 
 std::vector<Gasto> Carteira::listarGastos() const {
@@ -55,9 +60,8 @@ std::vector<Gasto> Carteira::listarGastos() const {
 }
 
 std::vector<Gasto> Carteira::maioresGastos(int n) const {
-  // N <= 0 nao tem o que mostrar
   if (n <= 0) {
-    return std::vector<Gasto>();
+    throw std::invalid_argument("N deve ser maior que zero.");
   }
 
   // copia a list para um vector: o sort do vector e o mais simples que a

@@ -64,14 +64,14 @@ void Arquivo::salvar(const Carteira& carteira, const std::string& nomeArquivo) {
   }
 }
 
-bool Arquivo::carregar(Carteira& carteira, const std::string& nomeArquivo) {
+void Arquivo::carregar(Carteira& carteira, const std::string& nomeArquivo) {
   errno = 0;
   std::ifstream arquivo(nomeArquivo.c_str());
   if (!arquivo.is_open()) {
     // a STL nao tem "existeArquivo()": ENOENT distingue "nao existe" de
     // "existe, mas nao abre"
     if (errno == ENOENT) {
-      return false;
+      throw std::runtime_error("Arquivo nao encontrado: " + nomeArquivo);
     }
     throw std::runtime_error("Nao foi possivel abrir o arquivo para leitura: " +
                              nomeArquivo);
@@ -92,12 +92,13 @@ bool Arquivo::carregar(Carteira& carteira, const std::string& nomeArquivo) {
       // campos[4] e o NOME da categoria, nao uma copia da categoria
       carteira.lancarGasto(campos[1], std::stod(campos[2]), campos[3],
                            campos[4]);
+    } else {
+      // prefixo desconhecido ou campos faltando: a excecao sobe ate o main
+      throw std::runtime_error("Linha invalida no arquivo: " + linha);
     }
-    // prefixo desconhecido ou campos faltando: ignora a linha
   }
 
   if (arquivo.bad()) {
     throw std::runtime_error("Erro ao ler o arquivo: " + nomeArquivo);
   }
-  return true;
 }

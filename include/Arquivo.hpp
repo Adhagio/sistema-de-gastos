@@ -10,7 +10,7 @@ class Carteira;
 class Arquivo {
 public:
   void salvar(const Carteira& carteira, const std::string& nomeArquivo);
-  bool carregar(Carteira& carteira, const std::string& nomeArquivo);
+  void carregar(Carteira& carteira, const std::string& nomeArquivo);
 };
 
 #endif
