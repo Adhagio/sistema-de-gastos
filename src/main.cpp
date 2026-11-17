@@ -1,15 +1,26 @@
+#include <exception>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
 
+#include "Arquivo.hpp"
 #include "Carteira.hpp"
 #include "Categoria.hpp"
 #include "Gasto.hpp"
 
 int main() {
   Carteira carteira;
+  Arquivo arquivo;
+  const std::string nomeArquivo = "dados.txt";
   bool rodando = true;
+
+  // carrega no inicio: se o arquivo nao existe, a carteira fica vazia
+  try {
+    arquivo.carregar(carteira, nomeArquivo);
+  } catch (const std::exception& e) {
+    std::cout << "Erro ao carregar: " << e.what() << std::endl;
+  }
 
   while (rodando) {
     std::cout << "=== Sistema de gastos ===" << std::endl;
@@ -39,6 +50,11 @@ int main() {
     std::cin.ignore(1000, '\n');
 
     if (opcao == 0) {
+      try {
+        arquivo.salvar(carteira, nomeArquivo);
+      } catch (const std::exception& e) {
+        std::cout << "Erro ao salvar: " << e.what() << std::endl;
+      }
       std::cout << "Ate logo." << std::endl;
       rodando = false;
 

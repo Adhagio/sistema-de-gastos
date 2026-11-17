@@ -53,3 +53,12 @@ Escreva com as suas palavras:
 - Um pedido que deu errado, o que veio errado e como você mudou o pedido: A IA inventou uma opção "listar categorias" no PLANO.md e mudou a numeração do menu. Corrigi atualizando o DESCRICAO.md.
 
 - Uma coisa que a IA sugeriu e você recusou, e por quê: Ela sugeriu set<Gasto> para os maiores gastos; recusei porque set descarta valores iguais. Pedi vector + sort.
+
+
+## Evolução
+
+### Arquivo
+
+- **Solicitação:** classe própria `Arquivo` com os métodos `salvar` e `carregar`, usando linhas com prefixo `C` (categoria) e `G` (gasto), com `try/catch` apenas no `main`.
+- **Implementação:** a classe `Arquivo` foi criada separadamente e utiliza apenas `<fstream>`. No `main`, o carregamento ocorre antes do menu e o salvamento na opção `0`, ambos dentro de `try/catch`.
+- **Destaques:** uso de `errno == ENOENT` para tratar arquivo inexistente (retornando vazio) e limitação das casas decimais para evitar dízimas.
