@@ -53,7 +53,12 @@ int main() {
       if (!lerLinha("> ", linhaOpcao)) {
         break;
       }
-      int opcao = std::stoi(linhaOpcao);
+      size_t posOpcao = 0;
+      int opcao = std::stoi(linhaOpcao, &posOpcao);
+      if (posOpcao != linhaOpcao.size()) {
+        throw std::invalid_argument("Opcao com caracteres invalidos: " +
+                                    linhaOpcao);
+      }
 
       if (opcao == 0) {
         try {
@@ -74,7 +79,12 @@ int main() {
         if (!lerLinha("Limite (0 = sem limite): ", textoLimite)) {
           break;
         }
-        double limite = std::stod(textoLimite);
+        size_t posLimite = 0;
+        double limite = std::stod(textoLimite, &posLimite);
+        if (posLimite != textoLimite.size()) {
+          throw std::invalid_argument("Limite com caracteres invalidos: " +
+                                      textoLimite);
+        }
 
         carteira.cadastrarCategoria(nome, limite);
         std::cout << "Categoria cadastrada." << std::endl;
@@ -104,7 +114,12 @@ int main() {
         if (!lerLinha("Valor: ", textoValor)) {
           break;
         }
-        double valor = std::stod(textoValor);
+        size_t posValor = 0;
+        double valor = std::stod(textoValor, &posValor);
+        if (posValor != textoValor.size()) {
+          throw std::invalid_argument("Valor com caracteres invalidos: " +
+                                      textoValor);
+        }
 
         std::string data;
         if (!lerLinha("Data (AAAA-MM-DD): ", data)) {
@@ -175,7 +190,11 @@ int main() {
         if (!lerLinha("N: ", textoN)) {
           break;
         }
-        int n = std::stoi(textoN);
+        size_t posN = 0;
+        int n = std::stoi(textoN, &posN);
+        if (posN != textoN.size()) {
+          throw std::invalid_argument("N com caracteres invalidos: " + textoN);
+        }
 
         std::vector<Gasto> maiores = carteira.maioresGastos(n);
         if (maiores.empty()) {

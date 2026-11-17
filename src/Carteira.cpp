@@ -1,6 +1,7 @@
 #include "Carteira.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 void Carteira::cadastrarCategoria(const std::string &nome, double limite) {
@@ -37,6 +38,9 @@ void Carteira::lancarGasto(const std::string &descricao, double valor,
   }
   if (valor <= 0) {
     throw std::invalid_argument("Valor do gasto deve ser maior que zero.");
+  }
+  if (std::isnan(valor) || std::isinf(valor)) {
+    throw std::invalid_argument("Valor do gasto deve ser um numero finito.");
   }
   if (!Gasto::dataValida(data)) {
     throw std::invalid_argument("Data invalida (use AAAA-MM-DD): " + data);
